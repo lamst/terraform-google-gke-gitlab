@@ -89,7 +89,7 @@ variable "gitlab_services_subnet_cidr" {
 
 variable "helm_chart_version" {
   type        = string
-  default     = "4.2.4"
+  default     = "6.5.3"
   description = "Helm chart version to install during deployment"
 }
 

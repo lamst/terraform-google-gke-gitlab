@@ -34,7 +34,7 @@ resource "random_id" "suffix" {
 
 module "gke_auth" {
   source  = "terraform-google-modules/kubernetes-engine/google//modules/auth"
-  version = "~> 21.0"
+  version = "~> 23.0"
 
   project_id   = module.project_services.project_id
   cluster_name = module.gke.name
@@ -243,40 +243,55 @@ resource "google_storage_bucket" "gitlab-runner-cache" {
 }
 // GKE Cluster
 module "gke" {
-  source  = "terraform-google-modules/kubernetes-engine/google"
-  version = "~> 21.0"
+  source = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-public-cluster"
 
   # Create an implicit dependency on service activation
   project_id = module.project_services.project_id
 
-  name               = "gitlab"
-  region             = var.region
-  regional           = true
-  kubernetes_version = var.gke_version
-
-  remove_default_node_pool = true
-  initial_node_count       = 1
-
-  network           = google_compute_network.gitlab.name
-  subnetwork        = google_compute_subnetwork.subnetwork.name
-  ip_range_pods     = "gitlab-cluster-pod-cidr"
-  ip_range_services = "gitlab-cluster-service-cidr"
+  name                = "gitlab"
+  region              = var.region
+  network             = google_compute_network.gitlab.name
+  subnetwork          = google_compute_subnetwork.subnetwork.name
+  ip_range_pods       = "gitlab-cluster-pod-cidr"
+  ip_range_services   = "gitlab-cluster-service-cidr"
 
   issue_client_certificate = true
-
-  node_pools = [
-    {
-      name         = "gitlab"
-      autoscaling  = false
-      machine_type = var.gke_machine_type
-      node_count   = 1
-    },
-  ]
-
-  node_pools_oauth_scopes = {
-    all = ["https://www.googleapis.com/auth/cloud-platform"]
-  }
 }
+# module "gke" {
+#   source  = "terraform-google-modules/kubernetes-engine/google"
+#   version = "~> 21.0"
+
+#   # Create an implicit dependency on service activation
+#   project_id = module.project_services.project_id
+
+#   name               = "gitlab"
+#   region             = var.region
+#   regional           = true
+#   kubernetes_version = var.gke_version
+
+#   remove_default_node_pool = true
+#   initial_node_count       = 1
+
+#   network           = google_compute_network.gitlab.name
+#   subnetwork        = google_compute_subnetwork.subnetwork.name
+#   ip_range_pods     = "gitlab-cluster-pod-cidr"
+#   ip_range_services = "gitlab-cluster-service-cidr"
+
+#   issue_client_certificate = true
+
+#   node_pools = [
+#     {
+#       name         = "gitlab"
+#       autoscaling  = false
+#       machine_type = var.gke_machine_type
+#       node_count   = 1
+#     },
+#   ]
+
+#   node_pools_oauth_scopes = {
+#     all = ["https://www.googleapis.com/auth/cloud-platform"]
+#   }
+# }
 
 resource "kubernetes_storage_class" "pd-ssd" {
   metadata {
