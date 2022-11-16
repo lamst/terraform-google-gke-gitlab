@@ -282,7 +282,7 @@ module "gke" {
   node_pools = [
     {
       name         = "gitlab"
-      autoscaling  = false
+      autoscaling  = true
       machine_type = var.gke_machine_type
       node_count   = 1
     },
